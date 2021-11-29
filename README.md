@@ -4,6 +4,8 @@
 [![docs-img]][docs]
 [![report-img]][report]
 [![codecov-img]][codecov]
+[![license-img]][license]
+[![release-img]][release]
 
 A dead simple CLI tool that prints the next semantic version based on the last tag of your git repository.
 
@@ -25,14 +27,18 @@ available commands:
         print the next minor version
   patch
         print the next patch version
-  current
-        print the current version
 
 available flags:
-  -debug
-        enable debug logs
+  -p string
+        shorthand for -prefix
   -prefix string
-        consider only prefixed tags. also, will be used to print the result
+        consider only prefixed tags (also, will be used to print the result)
+  -v    
+        shorthand for -verbose
+  -verbose
+        print additional information to stderr
+  -version
+        print the app version
 ```
 
 [ci]: https://github.com/junk1tm/nextver/actions/workflows/go.yml
@@ -43,3 +49,7 @@ available flags:
 [report-img]: https://goreportcard.com/badge/github.com/junk1tm/nextver
 [codecov]: https://codecov.io/gh/junk1tm/nextver
 [codecov-img]: https://codecov.io/gh/junk1tm/nextver/branch/main/graph/badge.svg
+[license]: https://github.com/junk1tm/nextver/blob/main/LICENSE
+[license-img]: https://img.shields.io/github/license/junk1tm/nextver
+[release]: https://github.com/junk1tm/nextver/releases
+[release-img]: https://img.shields.io/github/v/release/junk1tm/nextver
