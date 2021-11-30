@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	errWrongNumbersCount = errors.New("semver must have exactly 3 numbers")
-	errNegativeNumber    = errors.New("all semver numbers must be non-negative")
+	errInvalidFormat  = errors.New("semantic version must have exactly 3 numbers")
+	errNegativeNumber = errors.New("all semantic version numbers must be non-negative")
 )
 
 // version is a parsed semantic version.
@@ -26,10 +26,10 @@ type version struct {
 func parseVersion(s string) (version, error) {
 	parts := strings.Split(s, ".")
 	if len(parts) != 3 {
-		return version{}, errWrongNumbersCount
+		return version{}, errInvalidFormat
 	}
 
-	var numbs []int
+	var numbers []int
 	for _, p := range parts {
 		n, err := strconv.Atoi(p)
 		if err != nil {
@@ -38,13 +38,13 @@ func parseVersion(s string) (version, error) {
 		if n < 0 {
 			return version{}, errNegativeNumber
 		}
-		numbs = append(numbs, n)
+		numbers = append(numbers, n)
 	}
 
 	return version{
-		major: numbs[0],
-		minor: numbs[1],
-		patch: numbs[2],
+		major: numbers[0],
+		minor: numbers[1],
+		patch: numbers[2],
 	}, nil
 }
 
@@ -54,3 +54,4 @@ func (v version) String() string    { return fmt.Sprintf(format, v.major, v.mino
 func (v version) nextMajor() string { return fmt.Sprintf(format, v.major+1, 0, 0) }
 func (v version) nextMinor() string { return fmt.Sprintf(format, v.major, v.minor+1, 0) }
 func (v version) nextPatch() string { return fmt.Sprintf(format, v.major, v.minor, v.patch+1) }
+func (v version) isZero() bool      { return v.major == 0 && v.minor == 0 && v.patch == 0 }

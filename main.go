@@ -15,35 +15,38 @@ import (
 	"strings"
 )
 
-// available commands:
-const (
-	majorCmd   = "major"
-	minorCmd   = "minor"
-	patchCmd   = "patch"
-	currentCmd = "current"
-)
-
-// available flags:
-var (
-	debug  bool
-	prefix string
-)
+// appVersion is injected at build time.
+var appVersion = "dev"
 
 func main() {
+	var prefix string
+	flag.StringVar(&prefix, "p", "", "shorthand for -prefix")
+	flag.StringVar(&prefix, "prefix", "", "consider only prefixed tags (also, will be used to print the result)")
+
+	var verbose bool
+	flag.BoolVar(&verbose, "v", false, "\nshorthand for -verbose")
+	flag.BoolVar(&verbose, "verbose", false, "print additional information to stderr")
+
+	var version bool
+	flag.BoolVar(&version, "version", false, "print the app version")
+
 	flag.Usage = usage
-	flag.BoolVar(&debug, "debug", false, "enable debug logs")
-	flag.StringVar(&prefix, "prefix", "", "consider only prefixed tags. also, will be used to print the result")
 	flag.Parse()
+
+	if version {
+		fmt.Fprintf(os.Stderr, "%s version %s\n", os.Args[0], appVersion)
+		os.Exit(0)
+	}
 
 	log.SetFlags(0)
 	log.SetOutput(io.Discard)
 	log.SetPrefix(os.Args[0] + ": ")
-	if debug {
+	if verbose {
 		log.SetOutput(os.Stderr)
 	}
 
-	if err := run(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	if err := run(prefix); err != nil {
+		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 		if errors.As(err, new(usageError)) {
 			usage()
 			os.Exit(2)
@@ -51,6 +54,12 @@ func main() {
 		os.Exit(1)
 	}
 }
+
+const (
+	majorCmd = "major"
+	minorCmd = "minor"
+	patchCmd = "patch"
+)
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: %s [flags] <command>\n", os.Args[0])
@@ -61,20 +70,12 @@ func usage() {
 		fmt.Fprintf(os.Stderr, "  %s\n", cmd)
 		fmt.Fprintf(os.Stderr, "\tprint the next %s version\n", cmd)
 	}
-	fmt.Fprintf(os.Stderr, "  %s\n", currentCmd)
-	fmt.Fprintf(os.Stderr, "\tprint the current version\n")
 
 	fmt.Fprintf(os.Stderr, "\navailable flags:\n")
 	flag.PrintDefaults()
 }
 
-// usageError is a wrapper for error to indicate the need for usage printing.
-type usageError struct{ err error }
-
-func (e usageError) Error() string { return e.err.Error() }
-func (e usageError) Unwrap() error { return e.err }
-
-func run() error {
+func run(prefix string) error {
 	if flag.NArg() == 0 {
 		return usageError{errors.New("no command has been provided")}
 	}
@@ -87,8 +88,6 @@ func run() error {
 		printVersion = func(v version) { fmt.Print(prefix, v.nextMinor()) }
 	case patchCmd:
 		printVersion = func(v version) { fmt.Print(prefix, v.nextPatch()) }
-	case currentCmd:
-		printVersion = func(v version) { fmt.Print(prefix, v) }
 	default:
 		return usageError{fmt.Errorf("unknown command %q", cmd)}
 	}
@@ -96,15 +95,21 @@ func run() error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	var buf bytes.Buffer
+	var stdout, stderr bytes.Buffer
 	cmd := exec.CommandContext(ctx, "git", "tag", "--sort=-version:refname")
-	cmd.Stdout = &buf
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
+		if stderr.Len() != 0 {
+			return fmt.Errorf("running %q: %s", "git tag", strings.TrimSpace(stderr.String()))
+		}
 		return fmt.Errorf("running %q: %w", "git tag", err)
 	}
 
-	scanner := bufio.NewScanner(&buf)
+	var current version
+
+	scanner := bufio.NewScanner(&stdout)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if !strings.HasPrefix(line, prefix) {
@@ -119,12 +124,25 @@ func run() error {
 			continue
 		}
 
-		printVersion(v)
+		current = v
 		break
 	}
 	if err := scanner.Err(); err != nil {
 		return fmt.Errorf("reading %q output: %w", "git tag", err)
 	}
 
+	if current.isZero() {
+		return fmt.Errorf("no version in the form %q has been found", prefix+"x.y.z")
+	}
+
+	log.Printf("the current version is %q", prefix+current.String())
+	printVersion(current)
+
 	return nil
 }
+
+// usageError is a wrapper for error to indicate the need to print usage.
+type usageError struct{ err error }
+
+func (e usageError) Error() string { return e.err.Error() }
+func (e usageError) Unwrap() error { return e.err }

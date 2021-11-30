@@ -9,6 +9,9 @@ import (
 
 func Test_version(t *testing.T) {
 	v := version{1, 2, 3}
+	if v.isZero() {
+		t.Fatalf("want %v to be non-zero", v)
+	}
 
 	tests := []struct {
 		name   string
@@ -16,9 +19,9 @@ func Test_version(t *testing.T) {
 		want   string
 	}{
 		{name: "string", method: v.String, want: "1.2.3"},
-		{name: "next_major", method: v.nextMajor, want: "2.0.0"},
-		{name: "next_minor", method: v.nextMinor, want: "1.3.0"},
-		{name: "next_patch", method: v.nextPatch, want: "1.2.4"},
+		{name: "next major", method: v.nextMajor, want: "2.0.0"},
+		{name: "next minor", method: v.nextMinor, want: "1.3.0"},
+		{name: "next patch", method: v.nextPatch, want: "1.2.4"},
 	}
 
 	for _, tt := range tests {
@@ -39,8 +42,8 @@ func Test_parseVersion(t *testing.T) {
 	}{
 		{name: "valid version", input: "1.2.3", want: version{1, 2, 3}, err: nil},
 		{name: "prefixed version", input: "v1.2.3", want: version{}, err: strconv.ErrSyntax},
-		{name: "non numeric version", input: "x.y.z", want: version{}, err: strconv.ErrSyntax},
-		{name: "wrong numbers count", input: "1.2.3.4", want: version{}, err: errWrongNumbersCount},
+		{name: "non-numeric version", input: "x.y.z", want: version{}, err: strconv.ErrSyntax},
+		{name: "invalid format", input: "1.2.3.4", want: version{}, err: errInvalidFormat},
 		{name: "negative number", input: "-1.2.3", want: version{}, err: errNegativeNumber},
 	}
 
