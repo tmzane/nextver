@@ -1,0 +1,9 @@
+builds:
+  - ldflags:
+      - -s -w -X main.appVersion={{.Version}}
+
+release:
+  draft: true
+
+changelog:
+  sort: asc
