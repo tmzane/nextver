@@ -119,29 +119,16 @@ available flags:
 ```
 
 [ci]: https://github.com/junk1tm/nextver/actions/workflows/go.yml
-
 [ci-img]: https://github.com/junk1tm/nextver/actions/workflows/go.yml/badge.svg
-
 [docs]: https://pkg.go.dev/github.com/junk1tm/nextver
-
 [docs-img]: https://pkg.go.dev/badge/github.com/junk1tm/nextver.svg
-
 [report]: https://goreportcard.com/report/github.com/junk1tm/nextver
-
 [report-img]: https://goreportcard.com/badge/github.com/junk1tm/nextver
-
 [codecov]: https://codecov.io/gh/junk1tm/nextver
-
 [codecov-img]: https://codecov.io/gh/junk1tm/nextver/branch/main/graph/badge.svg
-
 [license]: https://github.com/junk1tm/nextver/blob/main/LICENSE
-
 [license-img]: https://img.shields.io/github/license/junk1tm/nextver
-
 [release]: https://github.com/junk1tm/nextver/releases
-
 [release-img]: https://img.shields.io/github/v/release/junk1tm/nextver
-
 [semver]: https://semver.org/#semantic-versioning-specification-semver
-
 [submodule]: https://github.com/go-modules-by-example/index/blob/master/009_submodules/README.md
