@@ -30,11 +30,6 @@ func parseVersion(s string) (*version, error) {
 		return nil, errInvalidFormat
 	}
 
-	// the first match must be equal to the provided string.
-	if matches[0] != s {
-		return nil, errInvalidFormat
-	}
-
 	var numbers []int
 	for _, match := range matches[1:minMatches] {
 		n, err := strconv.Atoi(match)
