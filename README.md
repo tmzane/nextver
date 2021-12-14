@@ -17,6 +17,12 @@ A dead simple CLI tool that prints the next semantic version based on the last t
 go install github.com/junk1tm/nextver@latest
 ```
 
+### Brew
+
+```bash
+brew install junk1tm/tap/nextver
+```
+
 ### Manual
 
 Download a prebuilt binary from the [Releases][release] page.

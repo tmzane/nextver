@@ -25,3 +25,13 @@ release:
 
 changelog:
   sort: asc
+
+brews:
+  - tap:
+      owner: junk1tm
+      name: homebrew-tap
+      branch: main
+      token: {{.Env.HOMEBREW_TAP_GITHUB_TOKEN}}
+    homepage: https://github.com/junk1tm/nextver
+    description: A dead simple CLI tool that prints the next semantic version based on the last tag of your git repository
+    license: MIT
