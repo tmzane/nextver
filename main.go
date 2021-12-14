@@ -15,8 +15,11 @@ import (
 	"strings"
 )
 
-// appVersion is injected at build time.
-var appVersion = "dev"
+// injected at build time.
+var (
+	Version = "dev"
+	Target  = "unknown"
+)
 
 func main() {
 	var prefix string
@@ -34,7 +37,7 @@ func main() {
 	flag.Parse()
 
 	if version {
-		fmt.Fprintf(os.Stderr, "%s version %s\n", os.Args[0], appVersion)
+		fmt.Fprintf(os.Stderr, "%s version %s %s\n", os.Args[0], Version, Target)
 		os.Exit(0)
 	}
 
@@ -80,14 +83,14 @@ func run(prefix string) error {
 		return usageError{errors.New("no command has been provided")}
 	}
 
-	var printVersion func(version)
+	var printVersion func(v *version)
 	switch cmd := flag.Arg(0); cmd {
 	case majorCmd:
-		printVersion = func(v version) { fmt.Print(prefix, v.nextMajor()) }
+		printVersion = func(v *version) { fmt.Print(prefix, v.nextMajor()) }
 	case minorCmd:
-		printVersion = func(v version) { fmt.Print(prefix, v.nextMinor()) }
+		printVersion = func(v *version) { fmt.Print(prefix, v.nextMinor()) }
 	case patchCmd:
-		printVersion = func(v version) { fmt.Print(prefix, v.nextPatch()) }
+		printVersion = func(v *version) { fmt.Print(prefix, v.nextPatch()) }
 	default:
 		return usageError{fmt.Errorf("unknown command %q", cmd)}
 	}
@@ -107,7 +110,7 @@ func run(prefix string) error {
 		return fmt.Errorf("running %q: %w", "git tag", err)
 	}
 
-	var current version
+	var current *version
 
 	scanner := bufio.NewScanner(&stdout)
 	for scanner.Scan() {
@@ -131,8 +134,11 @@ func run(prefix string) error {
 		return fmt.Errorf("reading %q output: %w", "git tag", err)
 	}
 
-	if current.isZero() {
-		return fmt.Errorf("no version in the form %q has been found", prefix+"x.y.z")
+	if current == nil {
+		if prefix != "" {
+			return fmt.Errorf("no valid semantic version with prefix %q has been found", prefix)
+		}
+		return errors.New("no valid semantic version has been found")
 	}
 
 	log.Printf("the current version is %q", prefix+current.String())
