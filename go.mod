@@ -1,3 +1,3 @@
 module github.com/junk1tm/nextver
 
-go 1.17
+go 1.18

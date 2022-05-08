@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-	"reflect"
 	"testing"
 )
 
@@ -22,9 +20,8 @@ func Test_version(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.method(); got != tt.want {
-				t.Errorf("got %s; want %s", got, tt.want)
-			}
+			got := tt.method()
+			equal[E](t, got, tt.want)
 		})
 	}
 }
@@ -33,12 +30,8 @@ func Test_parseVersion_valid(t *testing.T) {
 	test := func(input string, want version) {
 		t.Run(input, func(t *testing.T) {
 			got, err := parseVersion(input)
-			if !reflect.DeepEqual(got, &want) {
-				t.Errorf("got %s; want %s", got, &want)
-			}
-			if err != nil {
-				t.Errorf("got %v; want nil", err)
-			}
+			noerr[F](t, err)
+			equal[E](t, got, &want)
 		})
 	}
 
@@ -78,13 +71,8 @@ func Test_parseVersion_valid(t *testing.T) {
 func Test_parseVersion_invalid(t *testing.T) {
 	test := func(input string) {
 		t.Run(input, func(t *testing.T) {
-			got, err := parseVersion(input)
-			if got != nil {
-				t.Errorf("got %s; want nil", got)
-			}
-			if !errors.Is(err, errInvalidFormat) {
-				t.Errorf("got %v; want %v", err, errInvalidFormat)
-			}
+			_, err := parseVersion(input)
+			iserr[E](t, err, errInvalidFormat)
 		})
 	}
 

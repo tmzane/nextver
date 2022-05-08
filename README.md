@@ -7,9 +7,9 @@
 [![license-img]][license]
 [![release-img]][release]
 
-A dead simple CLI tool that prints the next semantic version based on the last tag of your git repository.
+> A dead simple CLI tool that prints the next semantic version based on the last tag of your git repository
 
-## Install
+## 📦 Install
 
 ### Go
 
@@ -27,7 +27,7 @@ brew install junk1tm/tap/nextver
 
 Download a prebuilt binary from the [Releases][release] page.
 
-## Usage
+## ⚙️ Usage
 
 `nextver` supports `major`, `minor` and `patch` commands:
 
